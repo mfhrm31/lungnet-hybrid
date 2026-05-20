@@ -1,0 +1,50 @@
+# LungNet-Hybrid Default Configuration
+# Reproduces results from Maqbool et al. (2026)
+
+data:
+  dataset: "LUNA16"
+  data_dir: "data/luna16/"
+  image_size: [64, 64]
+  augmentation: true
+
+preprocessing:
+  adaptive_threshold: true
+  morphological_dilation: true
+  histogram_equalization_bins: 100
+
+features:
+  static:
+    glcm: true
+    fos: true
+    histogram: true
+  dynamic:
+    backbone: "resnet50"
+    pretrained: true
+    layer: "avgpool"
+  fusion: "concatenate"
+
+feature_selection:
+  method: "kruskal_wallis"
+  top_k: 400
+
+classifier:
+  type: "xgboost"
+  bayesian_optimization:
+    n_iter: 20
+    init_points: 5
+  hyperparameter_bounds:
+    max_depth: [3, 10]
+    learning_rate: [0.01, 0.3]
+    n_estimators: [100, 1000]
+    gamma: [0, 10]
+    min_child_weight: [1, 10]
+
+training:
+  test_size: 0.2
+  cross_validation_folds: 5
+  random_state: 42
+
+evaluation:
+  metrics: ["accuracy", "precision", "recall", "f1", "auc", "mcc"]
+  save_confusion_matrix: true
+  save_roc_curve: true
